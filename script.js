@@ -171,60 +171,91 @@ function renderSkills() {
   if (!container) return;
 
   container.innerHTML = skills
-    .map((skill) => {
-      const n = projects.filter((p) => p.skills.includes(skill)).length;
-      const count = n ? `${n} project${n > 1 ? "s" : ""}` : "";
-      return `<span class="skill-pill" data-skill="${skill}" tabindex="0">
-        <span class="skill-name">${skill}</span>
-        <span class="skill-count">${count}</span>
-      </span>`;
-    })
+    .map(
+      (skill) =>
+        `<span class="skill-pill" data-skill="${skill}" role="button" aria-pressed="false" tabindex="0">${skill}</span>`
+    )
     .join("");
 }
 
-// ===== SKILL <-> PROJECT LINKING (feature 2) =====
+// ===== SKILL <-> PROJECT LINKING =====
+// Click a skill to list the projects that used it. Click it again to clear.
 function setupSkillProjectLinking() {
   const pills = document.querySelectorAll(".skill-pill");
-  const cards = document.querySelectorAll(".project-card");
+  const cards = Array.from(document.querySelectorAll(".project-card"));
   const infoEl = document.getElementById("skill-info");
 
-  if (!pills.length || !cards.length) return;
+  if (!pills.length || !cards.length || !infoEl) return;
 
-  function activateSkill(skillName) {
-    const matches = [];
+  const DEFAULT_TEXT = "Click a skill to see which projects used it.";
+  let selected = null;
 
-    cards.forEach((card) => {
-      const cardSkills = (card.dataset.skills || "").split("|");
-      const isMatch = cardSkills.includes(skillName);
-      card.classList.toggle("project-highlight", isMatch);
-      if (isMatch) {
-        matches.push(card.querySelector("h3")?.textContent || "");
-      }
+  function showSkill(skillName) {
+    const matches = cards.filter((card) =>
+      (card.dataset.skills || "").split("|").includes(skillName)
+    );
+
+    cards.forEach((card) => card.classList.toggle("project-highlight", matches.includes(card)));
+    pills.forEach((pill) => {
+      const on = pill.dataset.skill === skillName;
+      pill.classList.toggle("selected", on);
+      pill.setAttribute("aria-pressed", on ? "true" : "false");
     });
 
-    if (infoEl) {
-      infoEl.textContent = matches.length
-        ? `${skillName} was used in: ${matches.join(", ")}`
-        : `No projects tagged with ${skillName} yet.`;
-      infoEl.classList.add("skill-info-active");
+    infoEl.textContent = "";
+    const lead = document.createElement("p");
+    lead.className = "skill-info-lead";
+    lead.textContent = matches.length
+      ? `${skillName} was used in:`
+      : `No projects tagged with ${skillName} yet.`;
+    infoEl.appendChild(lead);
+
+    if (matches.length) {
+      const list = document.createElement("div");
+      list.className = "skill-info-projects";
+      matches.forEach((card) => {
+        const chip = document.createElement("span");
+        chip.className = "skill-project-chip";
+        const title = document.createElement("strong");
+        title.textContent = card.querySelector("h3")?.textContent || "";
+        const role = document.createElement("span");
+        role.textContent = card.querySelector(".project-role")?.textContent || "";
+        chip.append(title, role);
+        list.appendChild(chip);
+      });
+      infoEl.appendChild(list);
     }
+    infoEl.classList.add("skill-info-active");
   }
 
-  function resetSkill() {
+  function clearSkill() {
     cards.forEach((card) => card.classList.remove("project-highlight"));
-    if (infoEl) {
-      infoEl.textContent = "Hover over a skill to see which projects used it.";
-      infoEl.classList.remove("skill-info-active");
-    }
+    pills.forEach((pill) => {
+      pill.classList.remove("selected");
+      pill.setAttribute("aria-pressed", "false");
+    });
+    infoEl.textContent = DEFAULT_TEXT;
+    infoEl.classList.remove("skill-info-active");
   }
 
   pills.forEach((pill) => {
     const skillName = pill.dataset.skill;
-    pill.addEventListener("mouseenter", () => activateSkill(skillName));
-    pill.addEventListener("mouseleave", resetSkill);
-    // Keyboard/touch accessibility
-    pill.addEventListener("focus", () => activateSkill(skillName));
-    pill.addEventListener("blur", resetSkill);
+    pill.addEventListener("click", () => {
+      if (selected === skillName) {
+        selected = null;
+        clearSkill();
+      } else {
+        selected = skillName;
+        showSkill(skillName);
+      }
+    });
+    // Keyboard access: Enter / Space act like a click
+    pill.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        pill.click();
+      }
+    });
   });
 }
 
