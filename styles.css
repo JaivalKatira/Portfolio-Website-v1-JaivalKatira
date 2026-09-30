@@ -156,6 +156,11 @@ body {
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* the progress bar replaces the native scrollbar */
+}
+
+.slides-container::-webkit-scrollbar {
+  display: none;
 }
 
 .slide {
@@ -168,21 +173,21 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: calc(var(--nav-height) + 2rem) 1.75rem 2.5rem;
+  padding: calc(var(--nav-height) + 2rem) 0 2.5rem;
 }
 
+/* 2/3 content + exactly 1/3 scroll-animation zone (no gap, so the zone is 33.33vw) */
 .slide-inner {
-  max-width: 1100px;
   width: 100%;
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 2fr 1fr;
   align-items: center;
-  gap: 3rem;
+  gap: 0;
 }
 
 .slide-content {
-  max-width: 620px;
+  min-width: 0;
+  padding: 0 2.5rem 0 1.75rem;
   opacity: 0;
   transform: translateX(24px);
   transition: opacity 0.5s ease, transform 0.5s ease;
@@ -193,13 +198,15 @@ body {
   transform: translateX(0);
 }
 
-/* Reserved space for future animated content (React/Angular) */
+/* Scroll-animation zone: the middle-right 1/3 of the screen. Intentionally empty. */
 .slide-visual {
   position: relative;
+  width: 100%;
+  align-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
+  min-height: 340px;
 }
 
 .slide-index {
@@ -214,13 +221,14 @@ body {
 
 .section-heading {
   margin-bottom: 1.5rem;
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   font-weight: 700;
 }
 
 .about-text {
   color: var(--text-muted);
-  font-size: 1.05rem;
+  max-width: 68ch;
+  font-size: 1.2rem;
 }
 
 /* ===== HERO SLIDE ===== */
@@ -230,14 +238,17 @@ body {
 }
 
 .hero-top {
-  max-width: 1100px;
   width: 100%;
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 2fr 1fr;
   align-items: center;
-  gap: 2rem;
+  gap: 0;
   flex: 1;
+}
+
+.hero-content {
+  min-width: 0;
+  padding: 0 2.5rem 0 1.75rem;
 }
 
 .hero-mark {
@@ -247,16 +258,16 @@ body {
 }
 
 .hero-headline {
-  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  font-size: clamp(2rem, 4vw, 3.4rem);
   font-weight: 800;
   line-height: 1.14;
   letter-spacing: -0.01em;
 }
 
 .hero-support {
-  max-width: 46ch;
+  max-width: 56ch;
   color: var(--text-muted);
-  font-size: 1.02rem;
+  font-size: 1.1rem;
   margin-top: 1.1rem;
 }
 
@@ -278,55 +289,57 @@ body {
   margin-right: 0.35rem;
 }
 
-.hero-graphic svg {
+/* Empty scroll-animation trigger: right 1/3 of the viewport, vertically centred.
+   The old SVG illustration is gone; the container keeps its 340px footprint. */
+.hero-graphic {
   width: 100%;
-  height: auto;
-  max-height: 340px;
+  min-height: 340px;
+  align-self: center;
 }
 
-/* ===== STAT STRIP (bottom of hero slide) ===== */
-.hero-stats {
-  max-width: 1100px;
-  width: 100%;
-  margin: 1.5rem auto 0;
-  border-top: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1.4fr;
-}
-
-.stat-block {
-  padding: 1.1rem 1.25rem 0;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.stat-block:last-child {
-  border-right: none;
-}
-
-.stat-number {
+/* ===== HERO SCROLL HINT ===== */
+.hero-hint {
+  padding: 0 1.75rem;
+  margin-bottom: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 1.5rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.hero-hint-arrow {
+  display: inline-block;
+  margin-left: 0.4rem;
   color: var(--accent-amber);
+  animation: hint-nudge 1.8s ease-in-out infinite;
 }
 
-.stat-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+@keyframes hint-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
 }
 
-.stat-companies {
-  justify-content: center;
-  gap: 0.4rem;
+@media (prefers-reduced-motion: reduce) {
+  .hero-hint-arrow { animation: none; }
 }
 
-.company-name {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-muted);
+/* ===== DECK PROGRESS BAR (like a presentation) ===== */
+.deck-progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: var(--surface-alt);
+  z-index: 40;
+}
+
+.deck-progress-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--accent-amber);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.25s ease-out;
 }
 
 /* ===== EXPERIENCE ===== */
@@ -462,22 +475,138 @@ body {
   border: 1px solid rgba(108, 142, 235, 0.35);
 }
 
-/* ===== SKILLS ===== */
-.skill-container {
+/* ===== WORK: PROJECT INDEX + CLICK-SCROLLED PANELS ===== */
+.work-layout {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.work-index {
+  list-style: none;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
+.work-index-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  text-align: left;
+  font: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.work-index-item:hover,
+.work-index-item:focus-visible {
+  color: var(--text);
+  border-color: var(--text-muted);
+  outline: none;
+}
+
+.work-index-item.active {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border);
+  border-left-color: var(--accent-amber);
+}
+
+.work-index-title {
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.work-index-role {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* One project visible at a time; moved only by clicking (overflow hidden = no wheel scrolling) */
+.work-scroller {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: min(62vh, 480px);
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+
+.project-panel {
+  flex: 0 0 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.75rem 2rem;
+}
+
+.project-panel h3 {
+  font-size: 1.7rem;
+  margin-bottom: 0.75rem;
+}
+
+.project-panel .project-summary {
+  font-size: 1rem;
+  max-width: 62ch;
+}
+
+.project-panel .project-details p {
+  font-size: 0.95rem;
+  max-width: 62ch;
+}
+
+/* Panels show full detail all the time and don't lift on hover */
+.project-panel:hover,
+.project-panel:focus-within {
+  transform: none;
+  border-color: var(--border);
+}
+
+.project-panel .project-details,
+.project-panel:hover .project-details,
+.project-panel:focus-within .project-details {
+  max-height: none;
+  opacity: 1;
+  margin-top: 0.9rem;
+}
+
+.project-panel.project-highlight {
+  transform: none;
+  border-color: var(--accent-amber);
+}
+
+/* ===== SKILLS ===== */
+.skill-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1rem;
+}
+
 .skill-pill {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 112px;
   background: var(--surface-alt);
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 0.45rem 1rem;
-  border-radius: var(--radius-pill);
+  padding: 1.25rem 1.4rem;
+  border-radius: var(--radius-card);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1.15rem;
+  font-weight: 600;
   transition: background 0.25s ease, transform 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
@@ -507,7 +636,79 @@ body {
   transform: translateY(-4px);
 }
 
+.skill-count {
+  min-height: 1em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
 /* ===== CONTACT ===== */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 130px;
+  padding: 1.4rem 1.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.contact-card:hover,
+.contact-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--accent-blue);
+  outline: none;
+}
+
+.contact-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.contact-value {
+  font-size: 1.3rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* CV: full-width yellow box */
+.contact-card.contact-cv {
+  grid-column: 1 / -1;
+  min-height: 150px;
+  background: var(--accent-amber);
+  border-color: var(--accent-amber);
+  color: #17140C;
+}
+
+.contact-card.contact-cv .contact-label {
+  color: rgba(23, 20, 12, 0.7);
+}
+
+.contact-card.contact-cv .contact-value {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.contact-card.contact-cv:hover,
+.contact-card.contact-cv:focus-visible {
+  background: var(--accent-amber-dark);
+  border-color: var(--accent-amber-dark);
+}
+
 .contact-list a {
   color: var(--accent-blue);
   text-decoration: none;
@@ -579,24 +780,33 @@ body {
   }
 
   .hero-graphic {
-    order: -1;
-    max-width: 240px;
-    margin: 0 auto;
+    display: none;
   }
 
-  .hero-stats {
-    grid-template-columns: 1fr 1fr;
+  .slide-content,
+  .hero-content {
+    padding: 0 1.75rem;
   }
 
-  .stat-block:nth-child(2n) {
-    border-right: none;
+  .work-layout {
+    grid-template-columns: 1fr;
   }
 
-  .stat-companies {
-    grid-column: span 2;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    padding-top: 1.1rem;
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .work-index {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .work-index-item {
+    width: auto;
+  }
+
+  .work-scroller {
+    height: min(58vh, 460px);
   }
 
   .slide-dots {
@@ -632,18 +842,4 @@ body {
     margin: 0.4rem 0;
   }
 
-  .hero-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-block {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1rem;
-  }
-
-  .stat-companies {
-    grid-column: span 1;
-    border-top: none;
-  }
 }
