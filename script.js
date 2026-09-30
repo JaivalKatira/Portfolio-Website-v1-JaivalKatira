@@ -48,7 +48,7 @@ const projects = [
   },
   {
     title: "NSE Gap Signals",
-    role: "Trading Project",
+    role: "Personal Project",
     description:
       "Built a fully automated, serverless trading signal scanner for NSE stocks using Python and GitHub Actions, computing RSI(10) with Wilder smoothing and SMA(200) across the equity universe to flag candidate gap-reversion setups daily.",
     details:
@@ -204,72 +204,123 @@ function setupNavToggle() {
   });
 }
 
-// ===== ACTIVE NAV LINK ON SCROLL =====
-function setupActiveNavHighlight() {
-  const sections = document.querySelectorAll("main section[id]");
-  const navLinks = document.querySelectorAll(".nav-links a");
+// ===== HORIZONTAL SLIDE NAVIGATION (PPT-style) =====
+function setupSlideNavigation() {
+  const container = document.getElementById("slides-container");
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const navLinks = document.querySelectorAll(".site-nav a[href^='#']");
+  const dotsContainer = document.getElementById("slide-dots");
 
-  if (!sections.length || !navLinks.length) return;
+  if (!container || !slides.length) return;
 
+  // Build pagination dots, one per slide
+  const dots = slides.map((slide, i) => {
+    const dot = document.createElement("button");
+    dot.className = "slide-dot";
+    dot.setAttribute("aria-label", `Go to slide ${i + 1}${slide.id ? `: ${slide.id}` : ""}`);
+    dot.addEventListener("click", () => goToSlide(slide));
+    dotsContainer?.appendChild(dot);
+    return dot;
+  });
+
+  function goToSlide(slide) {
+    container.scrollTo({ left: slide.offsetLeft, behavior: "smooth" });
+  }
+
+  function currentSlideIndex() {
+    let closest = 0;
+    let closestDistance = Infinity;
+    slides.forEach((slide, i) => {
+      const distance = Math.abs(slide.offsetLeft - container.scrollLeft);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closest = i;
+      }
+    });
+    return closest;
+  }
+
+  // Nav links (and logo) scroll smoothly to the matching slide instead of jumping
+  navLinks.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      const targetId = link.getAttribute("href").slice(1);
+      const targetSlide = document.getElementById(targetId);
+      if (targetSlide) {
+        e.preventDefault();
+        goToSlide(targetSlide);
+      }
+    });
+  });
+
+  // Convert vertical wheel/trackpad scroll into horizontal slide movement
+  container.addEventListener(
+    "wheel",
+    (e) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        container.scrollLeft += e.deltaY;
+      }
+    },
+    { passive: false }
+  );
+
+  // Arrow-key navigation between slides
+  window.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const index = currentSlideIndex();
+    const nextIndex = e.key === "ArrowRight"
+      ? Math.min(index + 1, slides.length - 1)
+      : Math.max(index - 1, 0);
+    goToSlide(slides[nextIndex]);
+  });
+
+  // Track which slide is active: highlight its nav link and dot, trigger its entrance animation
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
+        const index = slides.indexOf(entry.target);
+        entry.target.classList.toggle("slide-active", entry.isIntersecting);
+
         if (entry.isIntersecting) {
           const id = entry.target.getAttribute("id");
           navLinks.forEach((link) => {
             link.classList.toggle("active", link.getAttribute("href") === `#${id}`);
           });
+          dots.forEach((dot, i) => dot.classList.toggle("active", i === index));
         }
       });
     },
-    { rootMargin: "-40% 0px -55% 0px", threshold: 0 }
+    { root: container, threshold: 0.6 }
   );
 
-  sections.forEach((section) => observer.observe(section));
+  slides.forEach((slide) => observer.observe(slide));
+
+  // Keep the current slide aligned if the viewport is resized
+  window.addEventListener("resize", () => {
+    const index = currentSlideIndex();
+    container.scrollTo({ left: slides[index].offsetLeft, behavior: "auto" });
+  });
 }
 
-// ===== SCROLL FADE-IN ANIMATION =====
-function setupScrollFadeIn() {
-  const panels = document.querySelectorAll(".panel");
-  if (!panels.length) return;
-
-  panels.forEach((panel) => panel.classList.add("fade-init"));
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("fade-in");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.15 }
-  );
-
-  panels.forEach((panel) => observer.observe(panel));
-}
-
-// ===== HERO NAME CURSOR-REPEL ANIMATION (feature 3) =====
+// ===== NAME CURSOR-REPEL ANIMATION (feature 3) =====
 function setupHeroNameAnimation() {
-  const titleEl = document.querySelector(".hero-title");
-  const heroEl = document.querySelector(".hero");
-  if (!titleEl || !heroEl) return;
+  const markEl = document.getElementById("site-mark");
+  const navEl = document.querySelector(".site-nav");
+  if (!markEl || !navEl) return;
 
-  const text = titleEl.textContent;
-  titleEl.textContent = "";
-  titleEl.classList.add("hero-title-animated");
+  const text = markEl.textContent;
+  markEl.textContent = "";
 
   const letters = [...text].map((char) => {
     const span = document.createElement("span");
-    span.className = "hero-letter";
+    span.className = "repel-letter";
     span.textContent = char === " " ? "\u00A0" : char;
-    titleEl.appendChild(span);
+    markEl.appendChild(span);
     return span;
   });
 
-  const REPEL_RADIUS = 70; // how close the cursor needs to be, in px
-  const REPEL_STRENGTH = 28; // max distance a letter moves away, in px
+  const REPEL_RADIUS = 45; // how close the cursor needs to be, in px
+  const REPEL_STRENGTH = 14; // max distance a letter moves away, in px
 
   let baseCenters = [];
 
@@ -305,8 +356,8 @@ function setupHeroNameAnimation() {
 
   cacheBaseCenters();
   window.addEventListener("resize", cacheBaseCenters);
-  heroEl.addEventListener("mousemove", handleMove);
-  heroEl.addEventListener("mouseleave", resetLetters);
+  navEl.addEventListener("mousemove", handleMove);
+  navEl.addEventListener("mouseleave", resetLetters);
 }
 
 // ===== INIT =====
@@ -316,8 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSkills();
   setFooterYear();
   setupNavToggle();
-  setupActiveNavHighlight();
-  setupScrollFadeIn();
+  setupSlideNavigation();
   setupSkillProjectLinking();
   setupHeroNameAnimation();
 });
