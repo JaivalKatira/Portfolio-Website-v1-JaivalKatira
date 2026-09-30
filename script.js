@@ -92,16 +92,31 @@ function renderExperience() {
 }
 
 // ===== RENDER PROJECTS =====
+// Left: clickable project titles. Right: one full panel per project, stacked vertically.
 function renderProjects() {
-  const container = document.getElementById("projects-container");
-  if (!container) return;
+  const index = document.getElementById("work-index");
+  const scroller = document.getElementById("work-scroller");
+  if (!index || !scroller) return;
 
-  container.innerHTML = projects
+  index.innerHTML = projects
     .map(
-      (project) => `
-      <article class="project-card" data-skills="${project.skills.join("|")}">
-        <h3>${project.title}</h3>
+      (project, i) => `
+      <li>
+        <button type="button" class="work-index-item" data-index="${i}" aria-controls="project-${i}">
+          <span class="work-index-title">${project.title}</span>
+          <span class="work-index-role">${project.role}</span>
+        </button>
+      </li>
+    `
+    )
+    .join("");
+
+  scroller.innerHTML = projects
+    .map(
+      (project, i) => `
+      <article class="project-card project-panel" id="project-${i}" data-skills="${project.skills.join("|")}">
         <p class="project-role">${project.role}</p>
+        <h3>${project.title}</h3>
         <p class="project-summary">${project.description}</p>
         <div class="project-details">
           <p>${project.details}</p>
@@ -116,13 +131,54 @@ function renderProjects() {
     .join("");
 }
 
+// ===== WORK: CLICK-TO-SCROLL BETWEEN PROJECTS =====
+// The project scroller has no wheel/drag scrolling (overflow hidden), so the mouse wheel
+// keeps moving between slides. Projects change only when a title is clicked.
+function setupWorkNavigation() {
+  const scroller = document.getElementById("work-scroller");
+  const items = Array.from(document.querySelectorAll(".work-index-item"));
+  const panels = Array.from(document.querySelectorAll(".project-panel"));
+  if (!scroller || !items.length || items.length !== panels.length) return;
+
+  let activeIndex = 0;
+
+  function setActive(i) {
+    activeIndex = i;
+    items.forEach((item, idx) => {
+      item.classList.toggle("active", idx === i);
+      item.setAttribute("aria-current", idx === i ? "true" : "false");
+    });
+  }
+
+  function scrollToProject(i) {
+    scroller.scrollTo({ top: panels[i].offsetTop, behavior: "smooth" });
+    setActive(i);
+  }
+
+  items.forEach((item, i) => item.addEventListener("click", () => scrollToProject(i)));
+
+  // Keep the current project aligned on resize
+  window.addEventListener("resize", () => {
+    scroller.scrollTo({ top: panels[activeIndex].offsetTop, behavior: "auto" });
+  });
+
+  setActive(0);
+}
+
 // ===== RENDER SKILLS =====
 function renderSkills() {
   const container = document.querySelector(".skill-container");
   if (!container) return;
 
   container.innerHTML = skills
-    .map((skill) => `<span class="skill-pill" data-skill="${skill}" tabindex="0">${skill}</span>`)
+    .map((skill) => {
+      const n = projects.filter((p) => p.skills.includes(skill)).length;
+      const count = n ? `${n} project${n > 1 ? "s" : ""}` : "";
+      return `<span class="skill-pill" data-skill="${skill}" tabindex="0">
+        <span class="skill-name">${skill}</span>
+        <span class="skill-count">${count}</span>
+      </span>`;
+    })
     .join("");
 }
 
@@ -302,6 +358,23 @@ function setupSlideNavigation() {
   });
 }
 
+// ===== DECK PROGRESS BAR =====
+// Fill = how much of the deck has been reached (first slide = 1/N, last slide = 100%).
+function setupProgressBar() {
+  const container = document.getElementById("slides-container");
+  const fill = document.getElementById("deck-progress-fill");
+  if (!container || !fill) return;
+
+  function update() {
+    const reached = (container.scrollLeft + container.clientWidth) / container.scrollWidth;
+    fill.style.transform = `scaleX(${Math.min(1, Math.max(0, reached))})`;
+  }
+
+  container.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+}
+
 // ===== NAME CURSOR-REPEL ANIMATION (feature 3) =====
 function setupHeroNameAnimation() {
   const markEl = document.getElementById("site-mark");
@@ -370,4 +443,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSlideNavigation();
   setupSkillProjectLinking();
   setupHeroNameAnimation();
+  setupWorkNavigation();
+  setupProgressBar();
 });
