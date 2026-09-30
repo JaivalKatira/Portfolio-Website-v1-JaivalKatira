@@ -464,6 +464,94 @@ function setupHeroNameAnimation() {
   navEl.addEventListener("mouseleave", resetLetters);
 }
 
+// ===== ROTARY IMAGE WHEEL =====
+// One card per slide, placed around a wheel. Wheel rotation = scroll position, so it is
+// fully scrubbable: scrolling forward rotates one way, scrolling back reverses it.
+// Card images: assets/image_<slide-id>.jpg  (hero, about, work, experience, skills, contact)
+function setupImageWheel() {
+  const container = document.getElementById("slides-container");
+  const wheel = document.getElementById("wheel");
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  if (!container || !wheel || !slides.length) return;
+
+  const step = 360 / slides.length; // degrees of rotation per slide
+
+  const cards = slides.map((slide, i) => {
+    const card = document.createElement("figure");
+    card.className = "wheel-card";
+    card.style.setProperty("--a", `${i * step}deg`);
+
+    const src = `assets/image_${slide.id}.jpg`;
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = "";
+    img.draggable = false;
+    img.addEventListener("error", () => {
+      img.remove();
+      card.classList.add("missing");
+    });
+
+    const missing = document.createElement("span");
+    missing.className = "wheel-missing";
+    missing.textContent = src;
+
+    card.append(img, missing);
+    wheel.appendChild(card);
+    return card;
+  });
+
+  let ticking = false;
+
+  function update() {
+    ticking = false;
+    const slideWidth = slides[1] ? slides[1].offsetLeft : container.clientWidth || 1;
+    const pos = Math.min(slides.length - 1, Math.max(0, container.scrollLeft / slideWidth));
+
+    wheel.style.transform = `rotate(${-pos * step}deg)`;
+
+    cards.forEach((card, i) => {
+      const d = Math.min(1, Math.abs(pos - i));
+      card.style.opacity = String(1 - d); // crossfade between neighbouring slides
+      card.style.zIndex = String(Math.round(100 - d * 50));
+    });
+  }
+
+  function requestUpdate() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }
+
+  container.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+  update();
+}
+
+// ===== THEME TOGGLE (dark: black + yellow, light: milky white + yellow) =====
+function setupThemeToggle() {
+  const root = document.documentElement;
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+
+  function apply(theme) {
+    root.setAttribute("data-theme", theme);
+    const isDark = theme === "dark";
+    btn.setAttribute("aria-checked", isDark ? "true" : "false");
+    btn.setAttribute("aria-label", isDark ? "Dark mode" : "Light mode");
+  }
+
+  apply(root.getAttribute("data-theme") === "light" ? "light" : "dark");
+
+  btn.addEventListener("click", () => {
+    const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    apply(next);
+    try {
+      localStorage.setItem("theme", next);
+    } catch (e) {}
+  });
+}
+
 // ===== INIT =====
 document.addEventListener("DOMContentLoaded", () => {
   renderExperience();
@@ -476,4 +564,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupHeroNameAnimation();
   setupWorkNavigation();
   setupProgressBar();
+  setupThemeToggle();
+  setupImageWheel();
 });
