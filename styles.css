@@ -15,9 +15,27 @@
   --font-display: 'Archivo', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
 
+  --nav-bg: rgba(11, 13, 15, 0.85);
+  --dot: rgba(255, 255, 255, 0.035);
+
   --radius-card: 10px;
   --radius-pill: 999px;
   --nav-height: 4.5rem;
+}
+
+/* Light theme: milky white + yellow */
+:root[data-theme="light"] {
+  --bg: #F6F2E9;
+  --surface: #FCFAF4;
+  --surface-alt: #EEE8D8;
+  --border: #DDD5C1;
+  --text: #1A1710;
+  --text-muted: #6B6557;
+  --accent-amber: #E0A82E;
+  --accent-amber-dark: #C48F1F;
+  --accent-blue: #3F5FBF;
+  --nav-bg: rgba(246, 242, 233, 0.88);
+  --dot: rgba(26, 23, 16, 0.06);
 }
 
 /* Reset & Base */
@@ -36,7 +54,7 @@ body {
   font-family: var(--font-display);
   color: var(--text);
   background-color: var(--bg);
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
   background-size: 28px 28px;
   line-height: 1.6;
 }
@@ -53,7 +71,7 @@ body {
   gap: 2.25rem;
   height: var(--nav-height);
   padding: 0 1.75rem;
-  background: rgba(11, 13, 15, 0.85);
+  background: var(--nav-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
 }
@@ -106,6 +124,57 @@ body {
   border-color: var(--accent-amber);
   color: var(--accent-amber);
 }
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle {
+  margin-left: auto;
+  position: relative;
+  flex-shrink: 0;
+  width: 54px;
+  height: 28px;
+  padding: 0;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.3s ease;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--accent-amber);
+  outline: none;
+}
+
+.theme-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-amber);
+  color: #17140C;
+  border-radius: 50%;
+  transform: translateX(26px); /* dark = knob on the right */
+  transition: transform 0.3s ease;
+}
+
+.theme-knob svg {
+  width: 13px;
+  height: 13px;
+}
+
+.theme-knob .icon-sun { display: none; }
+
+:root[data-theme="light"] .theme-knob {
+  transform: translateX(0);
+}
+
+:root[data-theme="light"] .theme-knob .icon-moon { display: none; }
+:root[data-theme="light"] .theme-knob .icon-sun { display: block; }
 
 /* ===== BUTTONS ===== */
 .btn {
@@ -747,6 +816,96 @@ body {
   font-size: 0.85rem;
 }
 
+/* ===== ROTARY IMAGE WHEEL =====
+   A fixed stage over the right 1/3 of the screen. Only the left half of the wheel is
+   visible (a semi-circle). The slides scroll beneath it; JS rotates the wheel with scroll. */
+.wheel-zone {
+  --R: min(calc(33.333vw - 4.5rem), calc((100vh - var(--nav-height) - 6rem) / 2));
+  position: fixed;
+  top: var(--nav-height);
+  right: 0;
+  bottom: 0;
+  width: 33.333vw;
+  z-index: 20;
+  pointer-events: none; /* wheel/click events fall through to the slides */
+  background-color: var(--bg);
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-attachment: fixed;
+}
+
+/* The semi-circle: axis sits on its flat right edge */
+.wheel-frame {
+  position: absolute;
+  top: 50%;
+  right: 3rem;
+  width: var(--R);
+  height: calc(var(--R) * 2);
+  transform: translateY(-50%);
+  border-radius: var(--R) 0 0 var(--R);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.wheel-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--border);
+  z-index: 200;
+}
+
+/* Full disc; its centre is the frame's right edge, so only the left half shows */
+.wheel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--R) * 2);
+  height: calc(var(--R) * 2);
+  border-radius: 50%;
+  will-change: transform;
+}
+
+/* Each slide's image is a full disc the size of the wheel, so whichever slide is active
+   fills the whole semi-circle. Card i is pre-rotated by its angle (--a); the wheel rotates
+   the opposite way on scroll, so the active image ends up upright. */
+.wheel-card {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  transform: rotate(var(--a));
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--surface-alt);
+}
+
+.wheel-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+.wheel-missing { /* shown only if the image file is not found */
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.wheel-card.missing .wheel-missing {
+  display: flex;
+}
+
 /* ===== SLIDE PAGINATION DOTS ===== */
 .slide-dots {
   position: fixed;
@@ -797,7 +956,8 @@ body {
     display: none;
   }
 
-  .hero-graphic {
+  .hero-graphic,
+  .wheel-zone {
     display: none;
   }
 
