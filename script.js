@@ -283,11 +283,19 @@ function setupNavToggle() {
     toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
   });
 
-  navLinks.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      navLinks.classList.remove("open");
-      toggleBtn.setAttribute("aria-expanded", "false");
-    });
+  function closeMenu() {
+    navLinks.classList.remove("open");
+    toggleBtn.setAttribute("aria-expanded", "false");
+  }
+
+  navLinks.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeMenu));
+
+  // Tap outside the menu, or press Escape, to close it
+  document.addEventListener("click", (e) => {
+    if (!nav.contains(e.target)) closeMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
   });
 }
 
@@ -382,8 +390,12 @@ function setupSlideNavigation() {
 
   slides.forEach((slide) => observer.observe(slide));
 
-  // Keep the current slide aligned if the viewport is resized
+  // Keep the current slide aligned if the viewport is resized.
+  // Width-only: phones fire resize when the browser bar shows/hides, which must not re-snap.
+  let lastWidth = window.innerWidth;
   window.addEventListener("resize", () => {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
     const index = currentSlideIndex();
     container.scrollTo({ left: slides[index].offsetLeft, behavior: "auto" });
   });
