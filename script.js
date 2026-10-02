@@ -7,6 +7,8 @@ const experiences = [
     title: "Business Analyst Intern",
     company: "Brizall Grounding Systems",
     dates: "April 2026 – June 2026",
+    icon: "briefcase",
+    tags: ["Data Analysis", "Sales Automation", "Data Visualization"],
     description:
       "Analyzed operational datasets to identify trends, implemented sales automation systems, and used data visualization tools to present actionable insights to senior management."
   },
@@ -14,6 +16,8 @@ const experiences = [
     title: "Finance Research Analyst",
     company: "Gravitas Mentor",
     dates: "June 2025 – July 2025",
+    icon: "trend",
+    tags: ["Market Research", "Investment Analysis"],
     description:
       "Conducted deep-dive research into financial markets and investment instruments, leveraging 2+ years of personal investing experience to evaluate market volatility and asset performance."
   },
@@ -21,6 +25,8 @@ const experiences = [
     title: "Data Analyst Intern",
     company: "Rifa Pharma",
     dates: "Sept 2024 – Dec 2024",
+    icon: "chart",
+    tags: ["Data Analysis", "Reporting", "Data Visualization"],
     description:
       "Analyzed operational datasets to identify trends and improve reporting efficiency, and utilized data visualization tools to present actionable insights to senior management."
   }
@@ -30,6 +36,7 @@ const projects = [
   {
     title: "ReSecureOS",
     role: "Data Specialist",
+    icon: "database",
     description: "Architected a complete data cleansing and recovery pipeline for a high-volume dataset.",
     details:
       "Optimized data integrity, advancing the team to the national-level evaluation rounds.",
@@ -39,6 +46,7 @@ const projects = [
   {
     title: "Sales Lead Automation Pipeline",
     role: "Sales Project",
+    icon: "workflow",
     description:
       "Built an end-to-end lead generation and outreach pipeline integrating Google Maps API, Selenium, and multiple LLM providers (Groq, Cerebras, NVIDIA NIM) to source, qualify, and message business leads at scale.",
     details:
@@ -49,6 +57,7 @@ const projects = [
   {
     title: "NSE Gap Signals",
     role: "Personal Project",
+    icon: "chart",
     description:
       "Built a fully automated, serverless trading signal scanner for NSE stocks using Python and GitHub Actions, computing RSI(10) with Wilder smoothing and SMA(200) across the equity universe to flag candidate gap-reversion setups daily.",
     details:
@@ -70,21 +79,63 @@ const skills = [
   "Multi Agent Work Flows"
 ];
 
-// ===== RENDER EXPERIENCE =====
-function renderExperience() {
-  const container = document.getElementById("experience-container");
-  if (!container) return;
+// ===== ICONS (stroke SVGs used in the detail panels) =====
+const ICONS = {
+  database: '<ellipse cx="12" cy="5.5" rx="7" ry="3"/><path d="M5 5.5v13c0 1.66 3.13 3 7 3s7-1.34 7-3v-13"/><path d="M5 12c0 1.66 3.13 3 7 3s7-1.34 7-3"/>',
+  workflow: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a3 3 0 0 1 3 3V14"/>',
+  chart: '<path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+  trend: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/>'
+};
 
-  container.innerHTML = experiences
+function iconSvg(name) {
+  const body = ICONS[name] || ICONS.chart;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
+
+const ARROW_SVG =
+  '<svg class="md-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+// ===== RENDER EXPERIENCE =====
+// Left: list of roles. Right: one detail panel per role (shown one at a time).
+function renderExperience() {
+  const index = document.getElementById("experience-index");
+  const stage = document.getElementById("experience-container");
+  if (!index || !stage) return;
+
+  index.innerHTML = experiences
     .map(
-      (exp) => `
-      <article class="experience-item">
-        <div class="experience-header">
-          <h3>${exp.title}</h3>
-          <span class="experience-dates">${exp.dates}</span>
+      (exp, i) => `
+      <li>
+        <button type="button" class="md-index-item" data-index="${i}" aria-controls="experience-${i}">
+          <span class="md-index-text">
+            <span class="md-index-title">${exp.title}</span>
+            <span class="md-index-meta">${exp.company}</span>
+          </span>
+          ${ARROW_SVG}
+        </button>
+      </li>
+    `
+    )
+    .join("");
+
+  stage.innerHTML = experiences
+    .map(
+      (exp, i) => `
+      <article class="md-panel" id="experience-${i}">
+        <div class="md-tagrow">
+          <span class="md-icon">${iconSvg(exp.icon)}</span>
+          <span class="md-tag">${exp.dates}</span>
         </div>
-        <p class="experience-company">${exp.company}</p>
-        <p class="experience-description">${exp.description}</p>
+        <h3>${exp.title}</h3>
+        <p class="md-company">${exp.company}</p>
+        <p class="md-text">${exp.description}</p>
+        <div class="md-meta">
+          <p class="md-meta-label">Focus areas</p>
+          <div class="project-skill-tags">
+            ${exp.tags.map((t) => `<span class="mini-skill">${t}</span>`).join("")}
+          </div>
+        </div>
       </article>
     `
     )
@@ -92,76 +143,72 @@ function renderExperience() {
 }
 
 // ===== RENDER PROJECTS =====
-// Left: clickable project titles. Right: one full panel per project, stacked vertically.
+// Left: list of projects. Right: one detail panel per project (shown one at a time).
 function renderProjects() {
   const index = document.getElementById("work-index");
-  const scroller = document.getElementById("work-scroller");
-  if (!index || !scroller) return;
+  const stage = document.getElementById("work-scroller");
+  if (!index || !stage) return;
 
   index.innerHTML = projects
     .map(
       (project, i) => `
       <li>
-        <button type="button" class="work-index-item" data-index="${i}" aria-controls="project-${i}">
-          <span class="work-index-title">${project.title}</span>
-          <span class="work-index-role">${project.role}</span>
+        <button type="button" class="md-index-item" data-index="${i}" aria-controls="project-${i}">
+          <span class="md-index-text">
+            <span class="md-index-title">${project.title}</span>
+            <span class="md-index-meta">${project.role}</span>
+          </span>
+          ${ARROW_SVG}
         </button>
       </li>
     `
     )
     .join("");
 
-  scroller.innerHTML = projects
+  stage.innerHTML = projects
     .map(
       (project, i) => `
-      <article class="project-card project-panel" id="project-${i}" data-skills="${project.skills.join("|")}">
-        <p class="project-role">${project.role}</p>
+      <article class="md-panel project-panel" id="project-${i}" data-skills="${project.skills.join("|")}">
+        <div class="md-tagrow">
+          <span class="md-icon">${iconSvg(project.icon)}</span>
+          <span class="md-tag project-role">${project.role}</span>
+        </div>
         <h3>${project.title}</h3>
-        <p class="project-summary">${project.description}</p>
-        <div class="project-details">
-          <p>${project.details}</p>
+        <p class="md-text">${project.description}</p>
+        <p class="md-text">${project.details}</p>
+        <div class="md-meta">
+          <p class="md-meta-label">Tech stack</p>
           <div class="project-skill-tags">
             ${project.skills.map((s) => `<span class="mini-skill">${s}</span>`).join("")}
           </div>
         </div>
-        <a href="${project.link}" target="_blank" rel="noopener">View project →</a>
+        <a class="md-button" href="${project.link}" target="_blank" rel="noopener">View project ${ARROW_SVG}</a>
       </article>
     `
     )
     .join("");
 }
 
-// ===== WORK: CLICK-TO-SCROLL BETWEEN PROJECTS =====
-// The project scroller has no wheel/drag scrolling (overflow hidden), so the mouse wheel
-// keeps moving between slides. Projects change only when a title is clicked.
-function setupWorkNavigation() {
-  const scroller = document.getElementById("work-scroller");
-  const items = Array.from(document.querySelectorAll(".work-index-item"));
-  const panels = Array.from(document.querySelectorAll(".project-panel"));
-  if (!scroller || !items.length || items.length !== panels.length) return;
+// ===== MASTER / DETAIL (Work + Experience) =====
+// Click an item on the left to show its panel on the right. Only one panel is visible at a time.
+function setupMasterDetail(indexId, stageId) {
+  const index = document.getElementById(indexId);
+  const stage = document.getElementById(stageId);
+  if (!index || !stage) return;
 
-  let activeIndex = 0;
+  const items = Array.from(index.querySelectorAll(".md-index-item"));
+  const panels = Array.from(stage.querySelectorAll(".md-panel"));
+  if (!items.length || items.length !== panels.length) return;
 
   function setActive(i) {
-    activeIndex = i;
     items.forEach((item, idx) => {
       item.classList.toggle("active", idx === i);
       item.setAttribute("aria-current", idx === i ? "true" : "false");
     });
+    panels.forEach((panel, idx) => panel.classList.toggle("is-active", idx === i));
   }
 
-  function scrollToProject(i) {
-    scroller.scrollTo({ top: panels[i].offsetTop, behavior: "smooth" });
-    setActive(i);
-  }
-
-  items.forEach((item, i) => item.addEventListener("click", () => scrollToProject(i)));
-
-  // Keep the current project aligned on resize
-  window.addEventListener("resize", () => {
-    scroller.scrollTo({ top: panels[activeIndex].offsetTop, behavior: "auto" });
-  });
-
+  items.forEach((item, i) => item.addEventListener("click", () => setActive(i)));
   setActive(0);
 }
 
@@ -182,7 +229,7 @@ function renderSkills() {
 // Click a skill to list the projects that used it. Click it again to clear.
 function setupSkillProjectLinking() {
   const pills = document.querySelectorAll(".skill-pill");
-  const cards = Array.from(document.querySelectorAll(".project-card"));
+  const cards = Array.from(document.querySelectorAll(".project-panel"));
   const infoEl = document.getElementById("skill-info");
 
   if (!pills.length || !cards.length || !infoEl) return;
@@ -347,14 +394,54 @@ function setupSlideNavigation() {
     });
   });
 
-  // Convert vertical wheel/trackpad scroll into horizontal slide movement
+  // Mouse wheel / trackpad: a vertical scroll gesture moves one slide at a time.
+  // If the current slide is taller than the screen, the wheel first scrolls that slide
+  // vertically, and only moves to the next slide once its top/bottom is reached.
+  let wheelAccum = 0;
+  let wheelLocked = false;
+  let lockedAt = 0;
+  let lastWheelAt = 0;
+
   container.addEventListener(
     "wheel",
     (e) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault();
-        container.scrollLeft += e.deltaY;
+      // Normalise line/page-based wheels (Firefox) to pixels
+      const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? container.clientHeight : 1;
+      const dx = e.deltaX * unit;
+      const dy = e.deltaY * unit;
+      const horizontal = Math.abs(dx) > Math.abs(dy) || (e.shiftKey && dx === 0);
+      // Dominant axis drives the deck: horizontal swipes, shift+wheel and vertical wheel all step slides
+      const delta = horizontal ? (dx || dy) : dy;
+      if (!delta) return;
+
+      const slide = e.target.closest ? e.target.closest(".slide") : null;
+      // Only vertical gestures may scroll a tall slide's own content first
+      if (!horizontal && slide && slide.scrollHeight > slide.clientHeight + 80) {
+        const atTop = slide.scrollTop <= 0;
+        const atBottom = slide.scrollTop + slide.clientHeight >= slide.scrollHeight - 1;
+        if ((dy > 0 && !atBottom) || (dy < 0 && !atTop)) return; // scroll the slide
       }
+
+      e.preventDefault();
+
+      const now = performance.now();
+      // Unlock once the previous gesture (including trackpad inertia) has fully died down
+      if (wheelLocked && now - lockedAt > 450 && now - lastWheelAt > 100) {
+        wheelLocked = false;
+        wheelAccum = 0;
+      }
+      lastWheelAt = now;
+      if (wheelLocked) return;
+
+      wheelAccum += delta;
+      if (Math.abs(wheelAccum) < 40) return;
+
+      const index = currentSlideIndex();
+      const next = wheelAccum > 0 ? Math.min(index + 1, slides.length - 1) : Math.max(index - 1, 0);
+      wheelAccum = 0;
+      wheelLocked = true;
+      lockedAt = now;
+      if (next !== index) goToSlide(slides[next]);
     },
     { passive: false }
   );
@@ -375,6 +462,7 @@ function setupSlideNavigation() {
       entries.forEach((entry) => {
         const index = slides.indexOf(entry.target);
         entry.target.classList.toggle("slide-active", entry.isIntersecting);
+        if (!entry.isIntersecting) entry.target.scrollTop = 0; // always re-enter a slide at its top
 
         if (entry.isIntersecting) {
           const id = entry.target.getAttribute("id");
@@ -574,7 +662,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSlideNavigation();
   setupSkillProjectLinking();
   setupHeroNameAnimation();
-  setupWorkNavigation();
+  setupMasterDetail("work-index", "work-scroller");
+  setupMasterDetail("experience-index", "experience-container");
   setupProgressBar();
   setupThemeToggle();
   setupImageWheel();
