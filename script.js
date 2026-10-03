@@ -606,6 +606,127 @@ function setupImageWheel() {
   update();
 }
 
+// ===== PHONE: WRAP TEXT AROUND THE WHEEL =====
+// The wheel is fixed to the screen while slide content scrolls beneath it, so CSS alone can't
+// wrap text around it. On phones this measures the wheel's circle and, on every scroll/resize,
+//  - gives each overlapping text block an invisible float shaped like the circle (real text wrap)
+//  - narrows overlapping cards/buttons so they stop at the circle's edge.
+function setupWheelTextWrap() {
+  const frame = document.querySelector(".wheel-frame");
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const container = document.getElementById("slides-container");
+  if (!frame || !slides.length) return;
+
+  const mq = window.matchMedia("(max-width: 800px)");
+  const TEXT = ".slide p, .slide h2, .slide h3";
+  const BOX = ".hero-cta-row, .md-index-item, .skill-pill, .contact-card, .md-button, .md-tagrow";
+  const GAP = 14; // breathing room between text and the circle (px)
+  let ticking = false;
+
+  function clear() {
+    document.querySelectorAll(".wheel-wrap").forEach((n) => n.remove());
+    document.querySelectorAll("[data-wheel-fit]").forEach((n) => {
+      n.style.maxWidth = "";
+      n.removeAttribute("data-wheel-fit");
+    });
+  }
+
+  function update() {
+    ticking = false;
+    const saved = slides.map((s) => s.scrollTop);
+    clear();
+
+    if (mq.matches) {
+      const fr = frame.getBoundingClientRect();
+      const R = fr.width;
+      if (R > 0) {
+        const cx = fr.right; // flat edge of the semi-circle = the right wall
+        const cy = fr.top + fr.height / 2;
+        const top = cy - R;
+        const bottom = cy + R;
+
+        const overlaps = (r) =>
+          r.width > 0 && r.height > 0 && r.bottom > top && r.top < bottom && r.right > cx - R - GAP && r.left < cx;
+
+        // Left-most x the circle reaches within the vertical span [a, b]
+        const edgeFor = (a, b) => {
+          const t = Math.max(a, top);
+          const bb = Math.min(b, bottom);
+          const d = t <= cy && bb >= cy ? 0 : Math.min(Math.abs(t - cy), Math.abs(bb - cy));
+          return cx - Math.sqrt(Math.max(0, R * R - d * d)) - GAP;
+        };
+
+        // DOM order = top-to-bottom, so each element is measured after the ones above it settled
+        document.querySelectorAll(TEXT + "," + BOX).forEach((el) => {
+          let r = el.getBoundingClientRect();
+          if (!overlaps(r)) return;
+
+          if (el.matches(BOX)) {
+            for (let i = 0; i < 3; i++) {
+              r = el.getBoundingClientRect();
+              const edge = edgeFor(r.top, r.bottom);
+              if (r.right <= edge + 0.5) break;
+              el.style.maxWidth = Math.max(120, edge - r.left) + "px";
+              el.setAttribute("data-wheel-fit", "1");
+            }
+            return;
+          }
+
+          const sp = document.createElement("span");
+          sp.className = "wheel-wrap";
+          sp.setAttribute("aria-hidden", "true");
+          el.insertBefore(sp, el.firstChild);
+
+          for (let i = 0; i < 3; i++) {
+            r = el.getBoundingClientRect();
+            const y0 = Math.max(r.top, top);
+            const y1 = Math.min(r.bottom, bottom);
+            if (y1 - y0 < 1) {
+              sp.remove();
+              return;
+            }
+            const H = y1 - y0;
+            const pts = [];
+            for (let y = 0; y <= H; y += 8) {
+              const dy = y0 + y - cy;
+              pts.push(`${(R - Math.sqrt(Math.max(0, R * R - dy * dy))).toFixed(1)}px ${y}px`);
+            }
+            const dyEnd = y1 - cy;
+            pts.push(`${(R - Math.sqrt(Math.max(0, R * R - dyEnd * dyEnd))).toFixed(1)}px ${H}px`);
+            pts.push(`${R}px ${H}px`, `${R}px 0px`);
+
+            sp.style.cssText =
+              `float:right;width:${R}px;height:${H}px;` +
+              `margin:${(y0 - r.top).toFixed(1)}px ${(r.right - cx).toFixed(1)}px 0 0;` +
+              `shape-outside:polygon(${pts.join(",")}) border-box;shape-margin:${GAP}px;`;
+          }
+        });
+      }
+    }
+
+    // Layout briefly collapses while rebuilding; put every slide back where it was
+    slides.forEach((s, i) => {
+      if (s.scrollTop !== saved[i]) s.scrollTop = saved[i];
+    });
+  }
+
+  function request() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }
+
+  slides.forEach((s) => s.addEventListener("scroll", request, { passive: true }));
+  if (container) container.addEventListener("scroll", request, { passive: true });
+  window.addEventListener("resize", request);
+  window.addEventListener("load", request);
+  document.addEventListener("click", request); // panel switches, skill taps change the layout
+  if (mq.addEventListener) mq.addEventListener("change", request);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(request);
+  request();
+}
+
 // ===== THEME TOGGLE (dark: black + yellow, light: milky white + yellow) =====
 function setupThemeToggle() {
   const root = document.documentElement;
@@ -645,4 +766,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupProgressBar();
   setupThemeToggle();
   setupImageWheel();
+  setupWheelTextWrap();
 });
