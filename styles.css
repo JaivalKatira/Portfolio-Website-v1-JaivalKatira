@@ -1009,7 +1009,7 @@ body {
     top: auto;
     left: auto;
     right: 0;
-    bottom: clamp(3.5rem, 12vh, 6rem);
+    bottom: clamp(1.5rem, 5vh, 3rem);
     width: var(--R);
     height: calc(var(--R) * 2);
     background: none;
