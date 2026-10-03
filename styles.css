@@ -1002,14 +1002,14 @@ body {
     display: none;
   }
 
-  /* Phone: the full semi-circle, flat edge flush against the right wall, sitting on the
-     bottom progress bar. No background block, so there is no empty space around it. */
+  /* Phone: the full semi-circle, flat edge flush against the right wall, floating in the
+     lower part of the screen (lifted off the bottom edge). No background block, so there is no empty space around it. */
   .wheel-zone {
     --R: min(34vw, 20vh);
     top: auto;
     left: auto;
     right: 0;
-    bottom: 5px;
+    bottom: clamp(3.5rem, 12vh, 6rem);
     width: var(--R);
     height: calc(var(--R) * 2);
     background: none;
