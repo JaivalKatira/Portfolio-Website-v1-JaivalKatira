@@ -1128,6 +1128,7 @@ body {
 @media (max-width: 800px) {
   .slide {
     padding: calc(var(--nav-height) + 1.25rem) 0 1.75rem;
+    overflow-anchor: none; /* stops scroll jumps while text re-wraps around the wheel */
   }
 
   /* Only the selected panel takes up space (on laptop all panels share one cell) */
@@ -1168,4 +1169,9 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .md-panel.is-active { animation: none; }
+}
+/* Invisible circle-shaped float that makes text wrap around the phone wheel (sized by JS) */
+.wheel-wrap {
+  float: right;
+  pointer-events: none;
 }
