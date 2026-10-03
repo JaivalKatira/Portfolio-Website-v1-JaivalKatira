@@ -1002,16 +1002,16 @@ body {
     display: none;
   }
 
-  /* Phone: the wheel is a quarter-circle locked to the bottom-right corner (sits on the
-     progress bar), no background block around it, so there is no empty space. */
+  /* Phone: the full semi-circle, flat edge flush against the right wall, sitting on the
+     bottom progress bar. No background block, so there is no empty space around it. */
   .wheel-zone {
-    --R: min(32vw, 40vh);
+    --R: min(34vw, 20vh);
     top: auto;
     left: auto;
     right: 0;
     bottom: 5px;
     width: var(--R);
-    height: var(--R);
+    height: calc(var(--R) * 2);
     background: none;
   }
 
@@ -1020,9 +1020,9 @@ body {
     right: 0;
     bottom: 0;
     width: var(--R);
-    height: var(--R);
+    height: calc(var(--R) * 2);
     transform: none;
-    border-radius: var(--R) 0 0 0;
+    border-radius: var(--R) 0 0 var(--R);
   }
 
   .slide-content,
