@@ -589,24 +589,6 @@ body {
   margin-bottom: 1rem;
 }
 
-.md-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  flex-shrink: 0;
-  border-radius: 50%;
-  color: var(--accent-amber);
-  background: rgba(217, 164, 65, 0.14);
-  border: 1px solid rgba(217, 164, 65, 0.3);
-}
-
-.md-icon svg {
-  width: 1.2rem;
-  height: 1.2rem;
-}
-
 .md-tag {
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -1020,6 +1002,29 @@ body {
     display: none;
   }
 
+  /* Phone: the wheel is a quarter-circle locked to the bottom-right corner (sits on the
+     progress bar), no background block around it, so there is no empty space. */
+  .wheel-zone {
+    --R: min(32vw, 40vh);
+    top: auto;
+    left: auto;
+    right: 0;
+    bottom: 5px;
+    width: var(--R);
+    height: var(--R);
+    background: none;
+  }
+
+  .wheel-frame {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    width: var(--R);
+    height: var(--R);
+    transform: none;
+    border-radius: var(--R) 0 0 0;
+  }
+
   .slide-content,
   .hero-content {
     padding: 0 1.75rem;
@@ -1086,7 +1091,6 @@ body {
 .md-index { gap: clamp(0.45rem, 1.3vh, 0.7rem); }
 .md-index-item { padding: clamp(0.6rem, 1.8vh, 0.95rem) 1.15rem; }
 .md-tagrow { margin-bottom: clamp(0.6rem, 1.6vh, 1rem); }
-.md-icon { width: clamp(2.1rem, 4.4vh, 2.75rem); height: clamp(2.1rem, 4.4vh, 2.75rem); }
 .md-panel h3 { font-size: clamp(1.9rem, min(4.2vw, 6.4vh), 3.8rem); margin-bottom: clamp(0.8rem, 2.2vh, 1.4rem); }
 .md-company { margin-top: clamp(-0.7rem, -1.2vh, -0.4rem); margin-bottom: clamp(0.7rem, 1.8vh, 1.2rem); }
 .md-text { font-size: clamp(0.92rem, 2.1vh, 1.15rem); line-height: 1.6; max-width: 62ch; margin-bottom: clamp(0.6rem, 1.6vh, 1rem); }
@@ -1164,152 +1168,4 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .md-panel.is-active { animation: none; }
-}
-
-/* ===== PHONE LAYOUT (<= 800px only; laptop/desktop is untouched) =====
-   - The rotary wheel moves to the bottom-left as a half-disc (flat edge on the bottom).
-   - The slide deck is shortened by the wheel's height so nothing scrolls underneath it.
-   - Text is scaled up to use the space (no big empty areas); dots move beside the wheel. */
-@media (max-width: 800px) {
-  :root {
-    --wheel-R: min(34vw, 9.5rem, 28vh);
-    --wheel-band: calc(var(--wheel-R) + 5px + 0.75rem); /* wheel + progress bar + breathing room */
-  }
-
-  /* Deck stops above the wheel band; the band shows the page's gritty background */
-  .slides-container,
-  .slide {
-    height: calc(100vh - var(--wheel-band));
-    height: calc(100dvh - var(--wheel-band));
-  }
-
-  .slide {
-    padding-bottom: 1rem;
-  }
-
-  /* Wheel: bottom-left half-disc */
-  .wheel-zone {
-    --R: var(--wheel-R);
-    display: block;
-    top: auto;
-    right: auto;
-    left: 0;
-    bottom: 5px; /* sits just above the progress bar */
-    width: calc(var(--R) * 2 + 1.25rem);
-    height: var(--R);
-    background: none;
-  }
-
-  .wheel-frame {
-    top: auto;
-    bottom: 0;
-    left: 1.25rem;
-    right: auto;
-    width: calc(var(--R) * 2);
-    height: var(--R);
-    transform: none;
-    border-radius: var(--R) var(--R) 0 0;
-  }
-
-  /* Only the top half of each image shows; keep the upper part of the photo in view */
-  .wheel-card img {
-    object-position: center top;
-  }
-
-  /* Pagination dots: a column at the bottom-right, level with the wheel */
-  .slide-dots {
-    top: auto;
-    right: 1.25rem;
-    bottom: calc(5px + 0.75rem);
-    transform: none;
-    gap: 0.6rem;
-  }
-
-  /* Slides fill the screen instead of floating in empty space */
-  .slide-inner {
-    margin-block: 0;
-    flex: 1;
-    align-content: center;
-  }
-
-  .slide-hero {
-    justify-content: flex-start;
-  }
-
-  .hero-top {
-    flex: 1;
-    align-content: center;
-  }
-
-  .hero-headline {
-    font-size: clamp(2.1rem, 9.6vw, 3rem);
-  }
-
-  .hero-support {
-    font-size: clamp(1.05rem, 4.4vw, 1.25rem);
-    margin-top: 1.25rem;
-  }
-
-  .hero-cta-row {
-    margin-top: 2rem;
-  }
-
-  .hero-callout {
-    margin-top: 1.5rem;
-    font-size: 0.95rem;
-  }
-
-  .hero-hint {
-    margin-bottom: 0.25rem;
-  }
-
-  .hint-pointer { display: none; }  /* phones swipe; no "Scroll" wording */
-
-  .section-heading {
-    font-size: clamp(2.4rem, 11vw, 3rem);
-  }
-
-  .about-text {
-    font-size: clamp(1.05rem, 4.5vw, 1.3rem);
-    line-height: 1.7;
-    max-width: none;
-  }
-
-  /* Hero: a touch smaller so it fits on one screen, with room below the nav */
-  .hero-headline {
-    font-size: clamp(1.9rem, 8.4vw, 2.6rem);
-  }
-
-  .slide-hero {
-    padding-top: calc(var(--nav-height) + 1rem);
-  }
-
-  /* Skills: two columns so the list is shorter and fills the width */
-  .skill-container {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  /* Contact: compact cards so the whole slide fits without scrolling */
-  .contact-grid {
-    gap: 0.75rem;
-  }
-
-  .contact-card {
-    min-height: 84px;
-    padding: 1rem 1.25rem;
-    gap: 0.5rem;
-  }
-
-  .contact-card.contact-cv {
-    min-height: 104px;
-  }
-
-  .contact-card.contact-cv .contact-value {
-    font-size: 1.7rem;
-  }
-
-  .site-footer-inline {
-    margin-top: 1rem;
-  }
 }
