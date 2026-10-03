@@ -7,7 +7,6 @@ const experiences = [
     title: "Business Analyst Intern",
     company: "Brizall Grounding Systems",
     dates: "April 2026 – June 2026",
-    icon: "briefcase",
     tags: ["Data Analysis", "Sales Automation", "Data Visualization"],
     description:
       "Analyzed operational datasets to identify trends, implemented sales automation systems, and used data visualization tools to present actionable insights to senior management."
@@ -16,7 +15,6 @@ const experiences = [
     title: "Finance Research Analyst",
     company: "Gravitas Mentor",
     dates: "June 2025 – July 2025",
-    icon: "trend",
     tags: ["Market Research", "Investment Analysis"],
     description:
       "Conducted deep-dive research into financial markets and investment instruments, leveraging 2+ years of personal investing experience to evaluate market volatility and asset performance."
@@ -25,7 +23,6 @@ const experiences = [
     title: "Data Analyst Intern",
     company: "Rifa Pharma",
     dates: "Sept 2024 – Dec 2024",
-    icon: "chart",
     tags: ["Data Analysis", "Reporting", "Data Visualization"],
     description:
       "Analyzed operational datasets to identify trends and improve reporting efficiency, and utilized data visualization tools to present actionable insights to senior management."
@@ -36,7 +33,6 @@ const projects = [
   {
     title: "ReSecureOS",
     role: "Data Specialist",
-    icon: "database",
     description: "Architected a complete data cleansing and recovery pipeline for a high-volume dataset.",
     details:
       "Optimized data integrity, advancing the team to the national-level evaluation rounds.",
@@ -46,7 +42,6 @@ const projects = [
   {
     title: "Sales Lead Automation Pipeline",
     role: "Sales Project",
-    icon: "workflow",
     description:
       "Built an end-to-end lead generation and outreach pipeline integrating Google Maps API, Selenium, and multiple LLM providers (Groq, Cerebras, NVIDIA NIM) to source, qualify, and message business leads at scale.",
     details:
@@ -57,7 +52,6 @@ const projects = [
   {
     title: "NSE Gap Signals",
     role: "Personal Project",
-    icon: "chart",
     description:
       "Built a fully automated, serverless trading signal scanner for NSE stocks using Python and GitHub Actions, computing RSI(10) with Wilder smoothing and SMA(200) across the equity universe to flag candidate gap-reversion setups daily.",
     details:
@@ -78,20 +72,6 @@ const skills = [
   "RAG Systems",
   "Multi Agent Work Flows"
 ];
-
-// ===== ICONS (stroke SVGs used in the detail panels) =====
-const ICONS = {
-  database: '<ellipse cx="12" cy="5.5" rx="7" ry="3"/><path d="M5 5.5v13c0 1.66 3.13 3 7 3s7-1.34 7-3v-13"/><path d="M5 12c0 1.66 3.13 3 7 3s7-1.34 7-3"/>',
-  workflow: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a3 3 0 0 1 3 3V14"/>',
-  chart: '<path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
-  trend: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
-  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/>'
-};
-
-function iconSvg(name) {
-  const body = ICONS[name] || ICONS.chart;
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
-}
 
 const ARROW_SVG =
   '<svg class="md-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
@@ -124,7 +104,6 @@ function renderExperience() {
       (exp, i) => `
       <article class="md-panel" id="experience-${i}">
         <div class="md-tagrow">
-          <span class="md-icon">${iconSvg(exp.icon)}</span>
           <span class="md-tag">${exp.dates}</span>
         </div>
         <h3>${exp.title}</h3>
@@ -170,7 +149,6 @@ function renderProjects() {
       (project, i) => `
       <article class="md-panel project-panel" id="project-${i}" data-skills="${project.skills.join("|")}">
         <div class="md-tagrow">
-          <span class="md-icon">${iconSvg(project.icon)}</span>
           <span class="md-tag project-role">${project.role}</span>
         </div>
         <h3>${project.title}</h3>
