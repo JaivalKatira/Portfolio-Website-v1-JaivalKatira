@@ -7,70 +7,66 @@ const experiences = [
     title: "Business Analyst Intern",
     company: "Brizall Grounding Systems",
     dates: "April 2026 – June 2026",
-    tags: ["Data Analysis", "Sales Automation", "Data Visualization"],
+    tags: ["Sales Automation", "Lead Nurturing", "Data Analysis", "Dashboards"],
     description:
-      "Analyzed operational datasets to identify trends, implemented sales automation systems, and used data visualization tools to present actionable insights to senior management."
-  },
-  {
-    title: "Finance Research Analyst",
-    company: "Gravitas Mentor",
-    dates: "June 2025 – July 2025",
-    tags: ["Market Research", "Investment Analysis"],
-    description:
-      "Conducted deep-dive research into financial markets and investment instruments, leveraging 2+ years of personal investing experience to evaluate market volatility and asset performance."
+      "Built automated sales systems and lead-nurturing workflows to reduce manual follow-ups. Analyzed sales pipelines and operational data to identify lead drop-offs, and created visual reports and dashboards for senior management."
   },
   {
     title: "Data Analyst Intern",
     company: "Rifa Pharma",
-    dates: "Sept 2024 – Dec 2024",
-    tags: ["Data Analysis", "Reporting", "Data Visualization"],
+    dates: "September 2024 – December 2024",
+    tags: ["Data Cleaning", "Data Analysis", "Reporting", "Data Visualization"],
     description:
-      "Analyzed operational datasets to identify trends and improve reporting efficiency, and utilized data visualization tools to present actionable insights to senior management."
+      "Cleaned and analyzed operational datasets to track performance trends and improve reporting. Created recurring reports and data pipelines to reduce manual errors, and presented complex findings through charts and presentations for leadership."
   }
 ];
 
 const projects = [
   {
-    title: "ReSecureOS",
-    role: "Data Specialist",
-    description: "Architected a complete data cleansing and recovery pipeline for a high-volume dataset.",
-    details:
-      "Optimized data integrity, advancing the team to the national-level evaluation rounds.",
-    skills: ["C++"],
-    link: "https://github.com/sanyampat/ReSecureOS-Open-Source-Data-Recovery-Sanitization-Tool"
-  },
-  {
-    title: "Sales Lead Automation Pipeline",
-    role: "Sales Project",
+    title: "Sales Automation Engine",
+    role: "Automation Project",
     description:
-      "Built an end-to-end lead generation and outreach pipeline integrating Google Maps API, Selenium, and multiple LLM providers (Groq, Cerebras, NVIDIA NIM) to source, qualify, and message business leads at scale.",
+      "Built an automated lead-generation and conversion pipeline using Python and multi-agent systems to collect lead data and understand target company profiles.",
     details:
-      "Engineered a 3-stage architecture (lead scraping → AI context generation → automated message sending) with tiered LLM fallback logic, cutting pipeline failure rate to near-zero across 20+ leads per run.",
-    skills: ["Python", "Multi Agent Work Flows"],
+      "Generated personalized outreach prompts using company context and automated delivery through WhatsApp and email integrations.",
+    skills: ["Python", "Multi-Agent Systems"],
     link: "https://github.com/JaivalKatira/Sales-Automation"
   },
   {
-    title: "NSE Gap Signals",
-    role: "Personal Project",
+    title: "ResecureOS (Digital Forensics & Security Tool)",
+    role: "Digital Forensics Project",
     description:
-      "Built a fully automated, serverless trading signal scanner for NSE stocks using Python and GitHub Actions, computing RSI(10) with Wilder smoothing and SMA(200) across the equity universe to flag candidate gap-reversion setups daily.",
+      "Developed a Python and C++ forensic tool for system-level data recovery, including image acquisition and hashing, and secure data erasure through disk overwriting.",
     details:
-      "Designed a two-stage validation pipeline (signal scan → next-morning confirmation) using GitHub Actions artifacts for state persistence and automated SMTP email alerts, reducing false signals by only surfacing confirmed calls to the user.",
-    skills: ["Python", "Data Analysis", "Machine Learning"],
+      "Prototyped modules in Python and rewrote performance-critical routines in C++ for faster file handling, supporting JPG, PDF, and ZIP files.",
+    skills: ["Python", "C++ (Basic)"],
+    link: "https://github.com/sanyampat/ReSecureOS-Open-Source-Data-Recovery-Sanitization-Tool"
+  },
+  {
+    title: "Trading Signals Generator",
+    role: "Cloud Application Project",
+    description:
+      "Engineered a customizable trading-signal generator that accepts user-defined parameters and uses financial APIs to provide real-time market insights.",
+    details:
+      "Containerized the application with Docker and deployed it on AWS ECS, using AWS EC2 as part of the cloud technology stack and maintaining a public GitHub codebase.",
+    skills: ["Python", "Docker", "AWS"],
     link: "https://github.com/JaivalKatira/Trading-Bot_v1"
   }
 ];
 
 const skills = [
   "Python",
-  "Data Analysis",
-  "Machine Learning",
-  "SQL",
-  "HTML",
-  "R",
-  "C++",
-  "RAG Systems",
-  "Multi Agent Work Flows"
+  "SQL (Basic)",
+  "C++ (Basic)",
+  "Excel",
+  "Power BI",
+  "Tableau",
+  "VS Code",
+  "Jupyter Notebooks",
+  "GitHub",
+  "Docker",
+  "AWS",
+  "Multi-Agent Systems"
 ];
 
 const ARROW_SVG =
